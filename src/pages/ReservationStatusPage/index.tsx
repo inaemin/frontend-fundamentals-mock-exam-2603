@@ -5,16 +5,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
-import { EQUIPMENT_LABELS, TIME_SLOTS, formatDate } from 'pages/constants';
+import { EQUIPMENT_LABELS, TIME_SLOTS, TIME_SLOT_START, TIME_SLOT_END, formatDate } from 'pages/constants';
+import { DateInput } from 'pages/components/DateInput';
 
 const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
-const TIMELINE_START = 9;
-const TIMELINE_END = 20;
-const TOTAL_MINUTES = (TIMELINE_END - TIMELINE_START) * 60;
+const TOTAL_MINUTES = (TIME_SLOT_END - TIME_SLOT_START) * 60;
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
-  return (h - TIMELINE_START) * 60 + m;
+  return (h - TIME_SLOT_START) * 60 + m;
 }
 
 export function ReservationStatusPage() {
@@ -96,31 +95,7 @@ export function ReservationStatusPage() {
             gap: 6px;
           `}
         >
-          <input
-            type="date"
-            value={date}
-            min={formatDate(new Date())}
-            onChange={e => setDate(e.target.value)}
-            aria-label="날짜"
-            css={css`
-              box-sizing: border-box;
-              font-size: 16px;
-              font-weight: 500;
-              line-height: 1.5;
-              height: 48px;
-              background-color: ${colors.grey50};
-              border-radius: 12px;
-              color: ${colors.grey800};
-              width: 100%;
-              border: 1px solid ${colors.grey200};
-              padding: 0 16px;
-              outline: none;
-              transition: border-color 0.15s;
-              &:focus {
-                border-color: ${colors.blue500};
-              }
-            `}
-          />
+          <DateInput value={date} onChange={setDate} />
         </div>
       </div>
 

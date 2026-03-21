@@ -11,7 +11,7 @@ import { DateInput } from 'pages/components/DateInput';
 const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
 const TOTAL_MINUTES = (TIME_SLOT_END - TIME_SLOT_START) * 60;
 
-function timeToMinutes(time: string): number {
+function timeToOffsetMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return (h - TIME_SLOT_START) * 60 + m;
 }
@@ -147,7 +147,7 @@ export function ReservationStatusPage() {
               `}
             >
               {HOUR_LABELS.map(t => {
-                const left = (timeToMinutes(t) / TOTAL_MINUTES) * 100;
+                const timeOffsetPercent = (timeToOffsetMinutes(t) / TOTAL_MINUTES) * 100;
                 return (
                   <Text
                     key={t}
@@ -156,7 +156,7 @@ export function ReservationStatusPage() {
                     color={colors.grey400}
                     css={css`
                       position: absolute;
-                      left: ${left}%;
+                      left: ${timeOffsetPercent}%;
                       transform: translateX(-50%);
                       font-size: 10px;
                       letter-spacing: -0.3px;
@@ -213,15 +213,16 @@ export function ReservationStatusPage() {
                 >
                   {roomReservations.map(
                     (res: { id: string; start: string; end: string; attendees: number; equipment: string[] }) => {
-                      const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
-                      const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
+                      const timeOffsetPercent = (timeToOffsetMinutes(res.start) / TOTAL_MINUTES) * 100;
+                      const width =
+                        ((timeToOffsetMinutes(res.end) - timeToOffsetMinutes(res.start)) / TOTAL_MINUTES) * 100;
                       const isActive = activeReservation === res.id;
                       return (
                         <div
                           key={res.id}
                           css={css`
                             position: absolute;
-                            left: ${left}%;
+                            left: ${timeOffsetPercent}%;
                             width: ${width}%;
                             height: 100%;
                           `}

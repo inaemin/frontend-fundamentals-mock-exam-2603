@@ -7,10 +7,13 @@ export const EQUIPMENT_LABELS: Record<string, string> = {
 
 export const ALL_EQUIPMENT = Object.keys(EQUIPMENT_LABELS);
 
+export const TIME_SLOT_START = 9;
+export const TIME_SLOT_END = 20;
+
 export const TIME_SLOTS: string[] = [];
-for (let h = 9; h <= 20; h++) {
+for (let h = TIME_SLOT_START; h <= TIME_SLOT_END; h++) {
   TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
-  if (h < 20) {
+  if (h < TIME_SLOT_END) {
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
   }
 }

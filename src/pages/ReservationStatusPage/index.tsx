@@ -5,17 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
-import { EQUIPMENT_LABELS, TIME_SLOTS, TIME_SLOT_START, TIME_SLOT_END, formatDate, ROUTES } from 'pages/constants';
+import { EQUIPMENT_LABELS, TOTAL_MINUTES, ROUTES } from 'pages/constants';
+import { timeToOffsetMinutes, formatDate } from 'pages/utils';
 import { DateInput } from 'pages/components/DateInput';
+import { TimelineHeader } from 'pages/components/TimelineHeader';
 import { MessageState, MESSAGE_TYPE } from 'pages/types';
-
-const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
-const TOTAL_MINUTES = (TIME_SLOT_END - TIME_SLOT_START) * 60;
-
-function timeToOffsetMinutes(time: string): number {
-  const [h, m] = time.split(':').map(Number);
-  return (h - TIME_SLOT_START) * 60 + m;
-}
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
@@ -123,50 +117,7 @@ export function ReservationStatusPage() {
             padding: 16px;
           `}
         >
-          {/* 시간 헤더 */}
-          <div
-            css={css`
-              display: flex;
-              align-items: flex-end;
-              margin-bottom: 8px;
-            `}
-          >
-            <div
-              css={css`
-                width: 80px;
-                flex-shrink: 0;
-                padding-right: 8px;
-              `}
-            />
-            <div
-              css={css`
-                flex: 1;
-                position: relative;
-                height: 18px;
-              `}
-            >
-              {HOUR_LABELS.map(t => {
-                const timeOffsetPercent = (timeToOffsetMinutes(t) / TOTAL_MINUTES) * 100;
-                return (
-                  <Text
-                    key={t}
-                    typography="t7"
-                    fontWeight="regular"
-                    color={colors.grey400}
-                    css={css`
-                      position: absolute;
-                      left: ${timeOffsetPercent}%;
-                      transform: translateX(-50%);
-                      font-size: 10px;
-                      letter-spacing: -0.3px;
-                    `}
-                  >
-                    {t.slice(0, 2)}
-                  </Text>
-                );
-              })}
-            </div>
-          </div>
+          <TimelineHeader />
 
           {/* 회의실별 타임라인 */}
           {rooms.map((room: { id: string; name: string }, index: number) => {

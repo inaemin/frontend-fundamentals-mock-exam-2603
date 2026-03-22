@@ -23,9 +23,4 @@ for (let h = TIME_SLOT_START; h <= TIME_SLOT_END; h++) {
   }
 }
 
-export function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+export const TOTAL_MINUTES = (TIME_SLOT_END - TIME_SLOT_START) * 60;

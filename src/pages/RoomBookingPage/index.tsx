@@ -6,7 +6,8 @@ import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/co
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
-import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, formatDate, ROUTES } from 'pages/constants';
+import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
+import { formatDate } from 'pages/utils';
 import { DateInput } from 'pages/components/DateInput';
 import { MESSAGE_TYPE } from 'pages/types';
 import { useNavigateWithMessage } from 'pages/hooks';

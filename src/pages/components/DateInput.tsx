@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { colors } from '_tosslib/constants/colors';
-import { formatDate } from 'pages/constants';
+import { formatDate } from 'pages/utils';
 
 interface DateInputProps {
   value: string;

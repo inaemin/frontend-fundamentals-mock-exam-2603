@@ -7,13 +7,13 @@ import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { ROUTES } from 'pages/constants';
 import { formatDate } from 'pages/utils';
-import { DateInput } from 'pages/components/DateInput';
-import { TimelineHeader } from 'pages/components/TimelineHeader';
-import { RoomTimelineRow } from 'pages/components/RoomTimelineRow';
-import { MessageBanner } from 'pages/components/MessageBanner';
-import { EmptyReservationList, ReservationList } from 'pages/components/MyReservationList';
-import { PageSection } from 'pages/components/PageSection';
-import { SectionDivider } from 'pages/components/SectionDivider';
+import { DateInput } from 'pages/common/DateInput';
+import { PageSection } from 'pages/common/PageSection';
+import { SectionDivider } from 'pages/common/SectionDivider';
+import { TimelineHeader } from './components/TimelineHeader';
+import { RoomTimelineRow } from './components/RoomTimelineRow';
+import { MessageBanner } from './components/MessageBanner';
+import { EmptyReservationList, ReservationList } from './components/MyReservationList';
 import { MessageState, MESSAGE_TYPE } from 'pages/types';
 
 export function ReservationStatusPage() {

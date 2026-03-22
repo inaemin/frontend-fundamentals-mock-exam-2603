@@ -8,9 +8,9 @@ import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
 import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
-import { DateInput } from 'pages/components/DateInput';
-import { PageSection } from 'pages/components/PageSection';
-import { SectionDivider } from 'pages/components/SectionDivider';
+import { DateInput } from 'pages/common/DateInput';
+import { PageSection } from 'pages/common/PageSection';
+import { SectionDivider } from 'pages/common/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
 import { useNavigateWithMessage, useBookingValidation } from 'pages/hooks';
 

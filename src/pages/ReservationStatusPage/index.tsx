@@ -16,22 +16,23 @@ function timeToOffsetMinutes(time: string): number {
   return (h - TIME_SLOT_START) * 60 + m;
 }
 
+type MessageType = 'success' | 'error';
+type MessageState = { type: MessageType; text: string };
+
 export function ReservationStatusPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const [date, setDate] = useState(formatDate(new Date()));
 
-  const locationState = location.state as { message?: string } | null;
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    locationState?.message ? { type: 'success', text: locationState.message } : null
-  );
+  const locationState = location.state as MessageState | null;
+  const [message, setMessage] = useState<MessageState | null>(locationState ?? null);
 
   useEffect(() => {
-    if (locationState?.message) {
+    if (locationState != null) {
       window.history.replaceState({}, '');
     }
-  }, [locationState]);
+  }, []);
 
   const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
   const { data: reservations = [] } = useQuery({

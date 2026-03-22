@@ -190,7 +190,9 @@ export function RoomBookingPage() {
         <PageSection
           title={
             <>
-              예약 가능 회의실
+              <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+                예약 가능 회의실
+              </Text>
               <Text typography="t7" fontWeight="medium" color={colors.grey500}>
                 {availableRooms.length}개
               </Text>

@@ -22,9 +22,13 @@ export function PageSection({ title, children }: PageSectionProps) {
           gap: 6px;
         `}
       >
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          {title}
-        </Text>
+        {typeof title === 'string' ? (
+          <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+            {title}
+          </Text>
+        ) : (
+          title
+        )}
       </div>
       <Spacing size={16} />
       {children}

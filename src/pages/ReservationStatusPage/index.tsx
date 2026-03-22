@@ -121,7 +121,9 @@ export function ReservationStatusPage() {
       <PageSection
         title={
           <>
-            내 예약
+            <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+              내 예약
+            </Text>
             {myReservationList.length > 0 && (
               <Text typography="t7" fontWeight="medium" color={colors.grey500}>
                 {myReservationList.length}건

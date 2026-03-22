@@ -7,51 +7,25 @@ import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
-import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
 import { DateInput } from 'pages/common/DateInput';
 import { PageSection } from 'pages/common/PageSection';
 import { SectionDivider } from 'pages/common/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
-import { useNavigateWithMessage, useBookingValidation } from 'pages/hooks';
-
-type FilterState = {
-  date: string;
-  startTime: string;
-  endTime: string;
-  attendees: number;
-  equipment: string[];
-  preferredFloor: number | null;
-};
-type FilterAction = { type: 'SET'; field: keyof FilterState; value: FilterState[keyof FilterState] };
-
-function filterReducer(state: FilterState, action: FilterAction): FilterState {
-  return { ...state, [action.field]: action.value };
-}
-
-function getInitialFilters(searchParams: URLSearchParams): FilterState {
-  return {
-    date: validateDate(searchParams.get('date') ?? ''),
-    startTime: validateTimeSlot(searchParams.get('startTime') ?? ''),
-    endTime: validateTimeSlot(searchParams.get('endTime') ?? ''),
-    attendees: validateAttendees(Number(searchParams.get('attendees')) || 1),
-    equipment: validateEquipment(searchParams.get('equipment')?.split(',').filter(Boolean) ?? []),
-    preferredFloor: searchParams.get('floor') ? Number(searchParams.get('floor')) : null,
-  };
-}
+import { useNavigateWithMessage, useBookingValidation, useInitialFilters, filterReducer } from './hooks';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
   const navigateWithMessage = useNavigateWithMessage();
   const queryClient = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
 
+  const { initialFilters, initError } = useInitialFilters();
   const [{ date, startTime, endTime, attendees, equipment, preferredFloor }, dispatch] = useReducer(
     filterReducer,
-    searchParams,
-    getInitialFilters
+    initialFilters
   );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(initError);
 
   // URL 쿼리 파라미터 동기화
   useEffect(() => {

@@ -1,6 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { MessageState } from 'pages/types';
-
 interface BookingFilter {
   startTime: string;
   endTime: string;
@@ -20,9 +17,4 @@ export function useBookingValidation({ startTime, endTime, attendees }: BookingF
   }
 
   return { validationError, isFilterComplete: hasTimeInputs && !validationError };
-}
-
-export function useNavigateWithMessage() {
-  const navigate = useNavigate();
-  return (path: string, state: MessageState) => navigate(path, { state });
 }

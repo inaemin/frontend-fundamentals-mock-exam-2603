@@ -1,23 +1,20 @@
 import { css } from '@emotion/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Top, Spacing, Button, Text, Select, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { getRooms, getReservations, createReservation } from 'pages/remotes';
-import axios from 'axios';
+import { getRooms, getReservations } from 'pages/remotes';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
 import { DateInput } from 'pages/common/DateInput';
 import { PageSection } from 'pages/common/PageSection';
 import { SectionDivider } from 'pages/common/SectionDivider';
-import { MESSAGE_TYPE, CreateReservationInput } from 'pages/types';
-import { useNavigateWithMessage, useBookingForm } from './hooks';
+import { MESSAGE_TYPE } from 'pages/types';
+import { useNavigateWithMessage, useBookingForm, useBookingSubmit } from './hooks';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
   const navigateWithMessage = useNavigateWithMessage();
-  const queryClient = useQueryClient();
-
   const { form, setField, initError, validationError, isFormComplete, getAvailableRooms } = useBookingForm();
   const { date, startTime, endTime, attendees, equipment, preferredFloor } = form;
 
@@ -31,11 +28,11 @@ export function RoomBookingPage() {
     enabled: !!date,
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateReservationInput) => createReservation(data),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['reservations', variables.date] });
-      queryClient.invalidateQueries({ queryKey: ['myReservations'] });
+  const { submit, isLoading } = useBookingSubmit(form, {
+    onSuccess: () => navigateWithMessage(ROUTES.HOME, { type: MESSAGE_TYPE.SUCCESS, text: '예약이 완료되었습니다!' }),
+    onError: message => {
+      setErrorMessage(message);
+      setSelectedRoomId(null);
     },
   });
 
@@ -47,45 +44,6 @@ export function RoomBookingPage() {
 
   const floors = [...new Set(rooms.map((r: { floor: number }) => r.floor))].sort((a: number, b: number) => a - b);
   const availableRooms = getAvailableRooms(rooms, reservations);
-
-  const handleBook = async () => {
-    if (!selectedRoomId) {
-      setErrorMessage('회의실을 선택해주세요.');
-      return;
-    }
-    if (!startTime || !endTime) {
-      setErrorMessage('시작 시간과 종료 시간을 선택해주세요.');
-      return;
-    }
-
-    try {
-      const result = await createMutation.mutateAsync({
-        roomId: selectedRoomId,
-        date,
-        start: startTime,
-        end: endTime,
-        attendees,
-        equipment,
-      });
-
-      if ('ok' in result && result.ok) {
-        navigateWithMessage(ROUTES.HOME, { type: MESSAGE_TYPE.SUCCESS, text: '예약이 완료되었습니다!' });
-        return;
-      }
-
-      const errResult = result as { message?: string };
-      setErrorMessage(errResult.message ?? '예약에 실패했습니다.');
-      setSelectedRoomId(null);
-    } catch (err: unknown) {
-      let serverMessage = '예약에 실패했습니다.';
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data as { message?: string } | undefined;
-        serverMessage = data?.message ?? serverMessage;
-      }
-      setErrorMessage(serverMessage);
-      setSelectedRoomId(null);
-    }
-  };
 
   return (
     <div
@@ -449,8 +407,8 @@ export function RoomBookingPage() {
           )}
 
           <Spacing size={16} />
-          <Button display="full" onClick={handleBook} disabled={createMutation.isLoading}>
-            {createMutation.isLoading ? '예약 중...' : '확정'}
+          <Button display="full" onClick={() => submit(selectedRoomId)} disabled={isLoading}>
+            {isLoading ? '예약 중...' : '확정'}
           </Button>
         </PageSection>
       )}

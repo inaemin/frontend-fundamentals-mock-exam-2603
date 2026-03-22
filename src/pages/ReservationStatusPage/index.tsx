@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
+import { Top, Spacing, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { ROUTES } from 'pages/constants';
@@ -12,6 +12,8 @@ import { TimelineHeader } from 'pages/components/TimelineHeader';
 import { RoomTimelineRow } from 'pages/components/RoomTimelineRow';
 import { MessageBanner } from 'pages/components/MessageBanner';
 import { EmptyReservationList, ReservationList } from 'pages/components/MyReservationList';
+import { PageSection } from 'pages/components/PageSection';
+import { SectionDivider } from 'pages/components/SectionDivider';
 import { MessageState, MESSAGE_TYPE } from 'pages/types';
 
 export function ReservationStatusPage() {
@@ -78,41 +80,14 @@ export function ReservationStatusPage() {
       <Spacing size={24} />
 
       {/* 날짜 선택 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          날짜 선택
-        </Text>
-        <Spacing size={16} />
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          `}
-        >
-          <DateInput value={date} onChange={setDate} />
-        </div>
-      </div>
+      <PageSection title="날짜 선택">
+        <DateInput value={date} onChange={setDate} />
+      </PageSection>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약 현황 타임라인 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          예약 현황
-        </Text>
-        <Spacing size={16} />
-
+      <PageSection title="예약 현황">
         <div
           css={css`
             background: ${colors.grey50};
@@ -121,8 +96,6 @@ export function ReservationStatusPage() {
           `}
         >
           <TimelineHeader />
-
-          {/* 회의실별 타임라인 */}
           {rooms.map((room: { id: string; name: string }, index: number) => {
             const roomReservations = reservations.filter((r: { roomId: string }) => r.roomId === room.id);
             return (
@@ -137,49 +110,34 @@ export function ReservationStatusPage() {
             );
           })}
         </div>
-      </div>
+      </PageSection>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 메시지 배너 */}
       {message && <MessageBanner message={message} />}
 
       {/* 내 예약 목록 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
-        <div
-          css={css`
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-          `}
-        >
-          <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+      <PageSection
+        title={
+          <>
             내 예약
-          </Text>
-          {myReservationList.length > 0 && (
-            <Text typography="t7" fontWeight="medium" color={colors.grey500}>
-              {myReservationList.length}건
-            </Text>
-          )}
-        </div>
-        <Spacing size={16} />
-
+            {myReservationList.length > 0 && (
+              <Text typography="t7" fontWeight="medium" color={colors.grey500}>
+                {myReservationList.length}건
+              </Text>
+            )}
+          </>
+        }
+      >
         {myReservationList.length === 0 ? (
           <EmptyReservationList />
         ) : (
           <ReservationList reservations={myReservationList} getRoomName={getRoomName} onCancel={handleCancel} />
         )}
-      </div>
+      </PageSection>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약하기 버튼 */}
       <div

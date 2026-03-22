@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Top, Spacing, Button, Text, Select, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations } from 'pages/remotes';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
@@ -12,6 +12,12 @@ import { SectionDivider } from 'pages/common/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
 import { useNavigateWithMessage, useBookingForm, useBookingSubmit } from './hooks';
 import { ErrorBanner } from './components/ErrorBanner';
+import { FormField } from './components/FormField';
+import { FieldSelect } from './components/FieldSelect';
+import { NumberInput } from './components/NumberInput';
+import { ToggleChip } from './components/ToggleChip';
+import { ValidationError } from './components/ValidationError';
+import { RoomList, EmptyRoomList } from './components/RoomList';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
@@ -93,18 +99,9 @@ export function RoomBookingPage() {
       {/* 예약 조건 입력 */}
       <PageSection title="예약 조건">
         {/* 날짜 */}
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          `}
-        >
-          <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-            날짜
-          </Text>
+        <FormField label="날짜">
           <DateInput value={date} onChange={value => handleFieldChange('date', value)} />
-        </div>
+        </FormField>
         <Spacing size={14} />
 
         {/* 시간 */}
@@ -114,50 +111,22 @@ export function RoomBookingPage() {
             gap: 12px;
           `}
         >
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
-            <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-              시작 시간
-            </Text>
-            <Select
+          <FormField label="시작 시간" flex>
+            <FieldSelect
               value={startTime}
-              onChange={e => handleFieldChange('startTime', e.target.value)}
+              onChange={value => handleFieldChange('startTime', value)}
+              options={TIME_SLOTS.slice(0, -1).map(t => ({ value: t, label: t }))}
               aria-label="시작 시간"
-            >
-              <option value="">선택</option>
-              {TIME_SLOTS.slice(0, -1).map(t => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
-            <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-              종료 시간
-            </Text>
-            <Select value={endTime} onChange={e => handleFieldChange('endTime', e.target.value)} aria-label="종료 시간">
-              <option value="">선택</option>
-              {TIME_SLOTS.slice(1).map(t => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          </div>
+            />
+          </FormField>
+          <FormField label="종료 시간" flex>
+            <FieldSelect
+              value={endTime}
+              onChange={value => handleFieldChange('endTime', value)}
+              options={TIME_SLOTS.slice(1).map(t => ({ value: t, label: t }))}
+              aria-label="종료 시간"
+            />
+          </FormField>
         </div>
         <Spacing size={14} />
 
@@ -168,79 +137,28 @@ export function RoomBookingPage() {
             gap: 12px;
           `}
         >
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
-            <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-              참석 인원
-            </Text>
-            <input
-              type="number"
-              min={1}
+          <FormField label="참석 인원" flex>
+            <NumberInput
               value={attendees}
-              onChange={e => handleFieldChange('attendees', Math.max(1, Number(e.target.value)))}
+              onChange={value => handleFieldChange('attendees', value)}
+              min={1}
               aria-label="참석 인원"
-              css={css`
-                box-sizing: border-box;
-                font-size: 16px;
-                font-weight: 500;
-                line-height: 1.5;
-                height: 48px;
-                background-color: ${colors.grey50};
-                border-radius: 12px;
-                color: ${colors.grey800};
-                width: 100%;
-                border: 1px solid ${colors.grey200};
-                padding: 0 16px;
-                outline: none;
-                transition: border-color 0.15s;
-                &:focus {
-                  border-color: ${colors.blue500};
-                }
-              `}
             />
-          </div>
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
-            <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-              선호 층
-            </Text>
-            <Select
-              value={preferredFloor ?? ''}
-              onChange={e => {
-                const val = e.target.value;
-                handleFieldChange('preferredFloor', val === '' ? null : Number(val));
-              }}
+          </FormField>
+          <FormField label="선호 층" flex>
+            <FieldSelect
+              value={preferredFloor?.toString() ?? ''}
+              onChange={value => handleFieldChange('preferredFloor', value === '' ? null : Number(value))}
+              options={floors.map((f: number) => ({ value: String(f), label: `${f}층` }))}
+              placeholder="전체"
               aria-label="선호 층"
-            >
-              <option value="">전체</option>
-              {floors.map((f: number) => (
-                <option key={f} value={f}>
-                  {f}층
-                </option>
-              ))}
-            </Select>
-          </div>
+            />
+          </FormField>
         </div>
         <Spacing size={14} />
 
         {/* 장비 */}
-        <div>
-          <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
-            필요 장비
-          </Text>
-          <Spacing size={8} />
+        <FormField label="필요 장비" spacing={8}>
           <div
             css={css`
               display: flex;
@@ -248,59 +166,22 @@ export function RoomBookingPage() {
               flex-wrap: wrap;
             `}
           >
-            {ALL_EQUIPMENT.map(eq => {
-              const selected = equipment.includes(eq);
-              return (
-                <button
-                  key={eq}
-                  type="button"
-                  onClick={() => {
-                    const next = selected ? equipment.filter(e => e !== eq) : [...equipment, eq];
-                    handleFieldChange('equipment', next);
-                  }}
-                  aria-label={EQUIPMENT_LABELS[eq]}
-                  aria-pressed={selected}
-                  css={css`
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    border: 1px solid ${selected ? colors.blue500 : colors.grey200};
-                    background: ${selected ? colors.blue50 : colors.grey50};
-                    color: ${selected ? colors.blue600 : colors.grey700};
-                    font-size: 14px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.15s;
-                    &:hover {
-                      border-color: ${selected ? colors.blue500 : colors.grey400};
-                    }
-                  `}
-                >
-                  {EQUIPMENT_LABELS[eq]}
-                </button>
-              );
-            })}
+            {ALL_EQUIPMENT.map(eq => (
+              <ToggleChip
+                key={eq}
+                label={EQUIPMENT_LABELS[eq]}
+                selected={equipment.includes(eq)}
+                onClick={() => {
+                  const next = equipment.includes(eq) ? equipment.filter(e => e !== eq) : [...equipment, eq];
+                  handleFieldChange('equipment', next);
+                }}
+              />
+            ))}
           </div>
-        </div>
+        </FormField>
       </PageSection>
 
-      {validationError && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
-          <Spacing size={8} />
-          <span
-            css={css`
-              color: ${colors.red500};
-              font-size: 14px;
-            `}
-            role="alert"
-          >
-            {validationError}
-          </span>
-        </div>
-      )}
+      {validationError && <ValidationError message={validationError} />}
 
       <SectionDivider />
 
@@ -317,72 +198,9 @@ export function RoomBookingPage() {
           }
         >
           {availableRooms.length === 0 ? (
-            <div
-              css={css`
-                padding: 40px 0;
-                text-align: center;
-                background: ${colors.grey50};
-                border-radius: 14px;
-              `}
-            >
-              <Text typography="t6" color={colors.grey500}>
-                조건에 맞는 회의실이 없습니다.
-              </Text>
-            </div>
+            <EmptyRoomList />
           ) : (
-            <div
-              css={css`
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-              `}
-            >
-              {availableRooms.map(
-                (room: { id: string; name: string; floor: number; capacity: number; equipment: string[] }) => {
-                  const isSelected = selectedRoomId === room.id;
-                  return (
-                    <div
-                      key={room.id}
-                      onClick={() => setSelectedRoomId(room.id)}
-                      role="button"
-                      aria-pressed={isSelected}
-                      aria-label={room.name}
-                      css={css`
-                        cursor: pointer;
-                        padding: 14px 16px;
-                        border-radius: 14px;
-                        border: 2px solid ${isSelected ? colors.blue500 : colors.grey200};
-                        background: ${isSelected ? colors.blue50 : colors.white};
-                        transition: all 0.15s;
-                        &:hover {
-                          border-color: ${isSelected ? colors.blue500 : colors.grey300};
-                        }
-                      `}
-                    >
-                      <ListRow
-                        contents={
-                          <ListRow.Text2Rows
-                            top={room.name}
-                            topProps={{ typography: 't6', fontWeight: 'bold', color: colors.grey900 }}
-                            bottom={`${room.floor}층 · ${room.capacity}명 · ${room.equipment
-                              .map((eq: string) => EQUIPMENT_LABELS[eq])
-                              .join(', ')}`}
-                            bottomProps={{ typography: 't7', color: colors.grey600 }}
-                          />
-                        }
-                        right={
-                          isSelected ? (
-                            <Text typography="t7" fontWeight="bold" color={colors.blue500}>
-                              선택됨
-                            </Text>
-                          ) : undefined
-                        }
-                      />
-                    </div>
-                  );
-                }
-              )}
-            </div>
+            <RoomList rooms={availableRooms} selectedRoomId={selectedRoomId} onSelect={setSelectedRoomId} />
           )}
 
           <Spacing size={16} />

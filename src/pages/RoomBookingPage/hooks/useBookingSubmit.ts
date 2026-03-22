@@ -57,5 +57,5 @@ export function useBookingSubmit(form: BookingFormState, { onSuccess, onError }:
     }
   };
 
-  return { submit, isLoading: mutation.isLoading };
+  return { submit, isLoading: mutation.isPending };
 }

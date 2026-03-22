@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { formatDate } from 'pages/utils';
 import { validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
+import { Room, Reservation } from 'pages/types';
 
 export type BookingFormState = {
   date: string;
@@ -64,5 +65,23 @@ export function useBookingForm() {
   }
   const isFormComplete = hasTimeInputs && !validationError;
 
-  return { form, setField, initError, validationError, isFormComplete };
+  const getAvailableRooms = (rooms: Room[], reservations: Reservation[]) => {
+    if (!isFormComplete) return [];
+    return rooms
+      .filter(room => {
+        if (room.capacity < form.attendees) return false;
+        if (!form.equipment.every(eq => room.equipment.includes(eq))) return false;
+        if (form.preferredFloor !== null && room.floor !== form.preferredFloor) return false;
+        const hasConflict = reservations.some(
+          r => r.roomId === room.id && r.date === form.date && r.start < form.endTime && r.end > form.startTime
+        );
+        return !hasConflict;
+      })
+      .sort((a, b) => {
+        if (a.floor !== b.floor) return a.floor - b.floor;
+        return a.name.localeCompare(b.name);
+      });
+  };
+
+  return { form, setField, initError, validationError, isFormComplete, getAvailableRooms };
 }

@@ -1,3 +1,21 @@
+export type Room = {
+  id: string;
+  name: string;
+  floor: number;
+  capacity: number;
+  equipment: string[];
+};
+
+export type Reservation = {
+  id: string;
+  roomId: string;
+  date: string;
+  start: string;
+  end: string;
+  attendees: number;
+  equipment: string[];
+};
+
 export type CreateReservationInput = {
   roomId: string;
   date: string;

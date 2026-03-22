@@ -1,16 +1,44 @@
 import { css } from '@emotion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text, Select, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
 import { formatDate } from 'pages/utils';
+import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
 import { DateInput } from 'pages/components/DateInput';
+import { PageSection } from 'pages/components/PageSection';
+import { SectionDivider } from 'pages/components/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
 import { useNavigateWithMessage } from 'pages/hooks';
+
+type FilterState = {
+  date: string;
+  startTime: string;
+  endTime: string;
+  attendees: number;
+  equipment: string[];
+  preferredFloor: number | null;
+};
+type FilterAction = { type: 'SET'; field: keyof FilterState; value: FilterState[keyof FilterState] };
+
+function filterReducer(state: FilterState, action: FilterAction): FilterState {
+  return { ...state, [action.field]: action.value };
+}
+
+function getInitialFilters(searchParams: URLSearchParams): FilterState {
+  return {
+    date: searchParams.get('date') ?? formatDate(new Date()),
+    startTime: searchParams.get('startTime') ?? '',
+    endTime: searchParams.get('endTime') ?? '',
+    attendees: Number(searchParams.get('attendees')) || 1,
+    equipment: searchParams.get('equipment')?.split(',').filter(Boolean) ?? [],
+    preferredFloor: searchParams.get('floor') ? Number(searchParams.get('floor')) : null,
+  };
+}
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
@@ -18,15 +46,10 @@ export function RoomBookingPage() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [date, setDate] = useState(searchParams.get('date') || formatDate(new Date()));
-  const [startTime, setStartTime] = useState(searchParams.get('startTime') || '');
-  const [endTime, setEndTime] = useState(searchParams.get('endTime') || '');
-  const [attendees, setAttendees] = useState(Number(searchParams.get('attendees')) || 1);
-  const [equipment, setEquipment] = useState<string[]>(
-    searchParams.get('equipment') ? searchParams.get('equipment')!.split(',').filter(Boolean) : []
-  );
-  const [preferredFloor, setPreferredFloor] = useState<number | null>(
-    searchParams.get('floor') ? Number(searchParams.get('floor')) : null
+  const [{ date, startTime, endTime, attendees, equipment, preferredFloor }, dispatch] = useReducer(
+    filterReducer,
+    searchParams,
+    getInitialFilters
   );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -211,16 +234,7 @@ export function RoomBookingPage() {
       <Spacing size={24} />
 
       {/* 예약 조건 입력 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          예약 조건
-        </Text>
-        <Spacing size={16} />
-
+      <PageSection title="예약 조건">
         {/* 날짜 */}
         <div
           css={css`
@@ -235,7 +249,7 @@ export function RoomBookingPage() {
           <DateInput
             value={date}
             onChange={value => {
-              setDate(value);
+              dispatch({ type: 'SET', field: 'date', value });
               handleFilterChange();
             }}
           />
@@ -263,7 +277,7 @@ export function RoomBookingPage() {
             <Select
               value={startTime}
               onChange={e => {
-                setStartTime(e.target.value);
+                dispatch({ type: 'SET', field: 'startTime', value: e.target.value });
                 handleFilterChange();
               }}
               aria-label="시작 시간"
@@ -290,7 +304,7 @@ export function RoomBookingPage() {
             <Select
               value={endTime}
               onChange={e => {
-                setEndTime(e.target.value);
+                dispatch({ type: 'SET', field: 'endTime', value: e.target.value });
                 handleFilterChange();
               }}
               aria-label="종료 시간"
@@ -329,7 +343,7 @@ export function RoomBookingPage() {
               min={1}
               value={attendees}
               onChange={e => {
-                setAttendees(Math.max(1, Number(e.target.value)));
+                dispatch({ type: 'SET', field: 'attendees', value: Math.max(1, Number(e.target.value)) });
                 handleFilterChange();
               }}
               aria-label="참석 인원"
@@ -368,7 +382,7 @@ export function RoomBookingPage() {
               value={preferredFloor ?? ''}
               onChange={e => {
                 const val = e.target.value;
-                setPreferredFloor(val === '' ? null : Number(val));
+                dispatch({ type: 'SET', field: 'preferredFloor', value: val === '' ? null : Number(val) });
                 handleFilterChange();
               }}
               aria-label="선호 층"
@@ -405,7 +419,7 @@ export function RoomBookingPage() {
                   type="button"
                   onClick={() => {
                     const next = selected ? equipment.filter(e => e !== eq) : [...equipment, eq];
-                    setEquipment(next);
+                    dispatch({ type: 'SET', field: 'equipment', value: next });
                     handleFilterChange();
                   }}
                   aria-label={EQUIPMENT_LABELS[eq]}
@@ -431,7 +445,7 @@ export function RoomBookingPage() {
             })}
           </div>
         </div>
-      </div>
+      </PageSection>
 
       {validationError && (
         <div
@@ -452,33 +466,20 @@ export function RoomBookingPage() {
         </div>
       )}
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약 가능 회의실 목록 */}
       {isFilterComplete && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              align-items: baseline;
-              gap: 6px;
-            `}
-          >
-            <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+        <PageSection
+          title={
+            <>
               예약 가능 회의실
-            </Text>
-            <Text typography="t7" fontWeight="medium" color={colors.grey500}>
-              {availableRooms.length}개
-            </Text>
-          </div>
-          <Spacing size={16} />
-
+              <Text typography="t7" fontWeight="medium" color={colors.grey500}>
+                {availableRooms.length}개
+              </Text>
+            </>
+          }
+        >
           {availableRooms.length === 0 ? (
             <div
               css={css`
@@ -552,7 +553,7 @@ export function RoomBookingPage() {
           <Button display="full" onClick={handleBook} disabled={createMutation.isLoading}>
             {createMutation.isLoading ? '예약 중...' : '확정'}
           </Button>
-        </div>
+        </PageSection>
       )}
 
       <Spacing size={24} />

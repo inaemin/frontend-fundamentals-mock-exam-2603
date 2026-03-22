@@ -11,6 +11,7 @@ import { PageSection } from 'pages/common/PageSection';
 import { SectionDivider } from 'pages/common/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
 import { useNavigateWithMessage, useBookingForm, useBookingSubmit } from './hooks';
+import { ErrorBanner } from './components/ErrorBanner';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
@@ -85,29 +86,7 @@ export function RoomBookingPage() {
         예약하기
       </Top.Top03>
 
-      {errorMessage && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
-          <Spacing size={12} />
-          <div
-            css={css`
-              padding: 10px 14px;
-              border-radius: 10px;
-              background: ${colors.red50};
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            `}
-          >
-            <Text typography="t7" fontWeight="medium" color={colors.red500}>
-              {errorMessage}
-            </Text>
-          </div>
-        </div>
-      )}
+      {errorMessage && <ErrorBanner message={errorMessage} />}
 
       <Spacing size={24} />
 

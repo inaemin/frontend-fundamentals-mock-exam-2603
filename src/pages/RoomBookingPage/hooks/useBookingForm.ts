@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { formatDate } from 'pages/utils';
-import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
+import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from '../validators';
 import { Room, Reservation } from 'pages/types';
 
 export type BookingFormState = {

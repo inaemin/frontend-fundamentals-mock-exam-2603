@@ -1,4 +1,5 @@
 import { http } from 'pages/http';
+import { CreateReservationInput } from 'pages/types';
 
 export function getRooms() {
   return http.get<{ id: string; name: string; floor: number; capacity: number; equipment: string[] }[]>('/api/rooms');
@@ -10,14 +11,7 @@ export function getReservations(date: string) {
   );
 }
 
-export function createReservation(data: {
-  roomId: string;
-  date: string;
-  start: string;
-  end: string;
-  attendees: number;
-  equipment: string[];
-}) {
+export function createReservation(data: CreateReservationInput) {
   return http.post<typeof data, { ok: boolean; reservation?: unknown; code?: string; message?: string }>(
     '/api/reservations',
     data

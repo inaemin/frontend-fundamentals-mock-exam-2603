@@ -10,7 +10,7 @@ import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/const
 import { DateInput } from 'pages/common/DateInput';
 import { PageSection } from 'pages/common/PageSection';
 import { SectionDivider } from 'pages/common/SectionDivider';
-import { MESSAGE_TYPE } from 'pages/types';
+import { MESSAGE_TYPE, CreateReservationInput } from 'pages/types';
 import { useNavigateWithMessage, useBookingForm } from './hooks';
 
 export function RoomBookingPage() {
@@ -32,14 +32,7 @@ export function RoomBookingPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: {
-      roomId: string;
-      date: string;
-      start: string;
-      end: string;
-      attendees: number;
-      equipment: string[];
-    }) => createReservation(data),
+    mutationFn: (data: CreateReservationInput) => createReservation(data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reservations', variables.date] });
       queryClient.invalidateQueries({ queryKey: ['myReservations'] });

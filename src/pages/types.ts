@@ -1,3 +1,12 @@
+export type CreateReservationInput = {
+  roomId: string;
+  date: string;
+  start: string;
+  end: string;
+  attendees: number;
+  equipment: string[];
+};
+
 export const MESSAGE_TYPE = {
   SUCCESS: 'success',
   ERROR: 'error',

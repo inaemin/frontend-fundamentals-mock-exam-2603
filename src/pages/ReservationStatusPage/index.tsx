@@ -5,8 +5,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
-import { EQUIPMENT_LABELS, TIME_SLOTS, TIME_SLOT_START, TIME_SLOT_END, formatDate } from 'pages/constants';
+import { EQUIPMENT_LABELS, TIME_SLOTS, TIME_SLOT_START, TIME_SLOT_END, formatDate, ROUTES } from 'pages/constants';
 import { DateInput } from 'pages/components/DateInput';
+import { MessageState, MESSAGE_TYPE } from 'pages/types';
 
 const HOUR_LABELS = TIME_SLOTS.filter(t => t.endsWith(':00'));
 const TOTAL_MINUTES = (TIME_SLOT_END - TIME_SLOT_START) * 60;
@@ -15,9 +16,6 @@ function timeToOffsetMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return (h - TIME_SLOT_START) * 60 + m;
 }
-
-type MessageType = 'success' | 'error';
-type MessageState = { type: MessageType; text: string };
 
 export function ReservationStatusPage() {
   const navigate = useNavigate();
@@ -53,9 +51,9 @@ export function ReservationStatusPage() {
   const handleCancel = async (id: string) => {
     try {
       await cancelMutation.mutateAsync(id);
-      setMessage({ type: 'success', text: '예약이 취소되었습니다.' });
+      setMessage({ type: MESSAGE_TYPE.SUCCESS, text: '예약이 취소되었습니다.' });
     } catch {
-      setMessage({ type: 'error', text: '취소에 실패했습니다.' });
+      setMessage({ type: MESSAGE_TYPE.ERROR, text: '취소에 실패했습니다.' });
     }
   };
 
@@ -426,7 +424,7 @@ export function ReservationStatusPage() {
           padding: 0 24px;
         `}
       >
-        <Button display="full" onClick={() => navigate('/booking')}>
+        <Button display="full" onClick={() => navigate(ROUTES.BOOKING)}>
           예약하기
         </Button>
       </div>

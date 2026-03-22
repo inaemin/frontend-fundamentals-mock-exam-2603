@@ -6,11 +6,14 @@ import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/co
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
-import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, formatDate } from 'pages/constants';
+import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, formatDate, ROUTES } from 'pages/constants';
 import { DateInput } from 'pages/components/DateInput';
+import { MESSAGE_TYPE } from 'pages/types';
+import { useNavigateWithMessage } from 'pages/hooks';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
+  const navigateWithMessage = useNavigateWithMessage();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -47,8 +50,14 @@ export function RoomBookingPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { roomId: string; date: string; start: string; end: string; attendees: number; equipment: string[] }) =>
-      createReservation(data),
+    mutationFn: (data: {
+      roomId: string;
+      date: string;
+      start: string;
+      end: string;
+      attendees: number;
+      equipment: string[];
+    }) => createReservation(data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reservations', variables.date] });
       queryClient.invalidateQueries({ queryKey: ['myReservations'] });
@@ -116,7 +125,7 @@ export function RoomBookingPage() {
       });
 
       if ('ok' in result && result.ok) {
-        navigate('/', { state: { type: 'success', text: '예약이 완료되었습니다!' } });
+        navigateWithMessage(ROUTES.HOME, { type: MESSAGE_TYPE.SUCCESS, text: '예약이 완료되었습니다!' });
         return;
       }
 
@@ -148,7 +157,7 @@ export function RoomBookingPage() {
       >
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate(ROUTES.HOME)}
           aria-label="뒤로가기"
           css={css`
             background: none;

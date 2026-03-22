@@ -7,13 +7,12 @@ import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import axios from 'axios';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, TIME_SLOTS, ROUTES } from 'pages/constants';
-import { formatDate } from 'pages/utils';
 import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
 import { DateInput } from 'pages/components/DateInput';
 import { PageSection } from 'pages/components/PageSection';
 import { SectionDivider } from 'pages/components/SectionDivider';
 import { MESSAGE_TYPE } from 'pages/types';
-import { useNavigateWithMessage } from 'pages/hooks';
+import { useNavigateWithMessage, useBookingValidation } from 'pages/hooks';
 
 type FilterState = {
   date: string;
@@ -31,11 +30,11 @@ function filterReducer(state: FilterState, action: FilterAction): FilterState {
 
 function getInitialFilters(searchParams: URLSearchParams): FilterState {
   return {
-    date: searchParams.get('date') ?? formatDate(new Date()),
-    startTime: searchParams.get('startTime') ?? '',
-    endTime: searchParams.get('endTime') ?? '',
-    attendees: Number(searchParams.get('attendees')) || 1,
-    equipment: searchParams.get('equipment')?.split(',').filter(Boolean) ?? [],
+    date: validateDate(searchParams.get('date') ?? ''),
+    startTime: validateTimeSlot(searchParams.get('startTime') ?? ''),
+    endTime: validateTimeSlot(searchParams.get('endTime') ?? ''),
+    attendees: validateAttendees(Number(searchParams.get('attendees')) || 1),
+    equipment: validateEquipment(searchParams.get('equipment')?.split(',').filter(Boolean) ?? []),
     preferredFloor: searchParams.get('floor') ? Number(searchParams.get('floor')) : null,
   };
 }
@@ -94,17 +93,7 @@ export function RoomBookingPage() {
     setErrorMessage(null);
   };
 
-  // 입력 검증
-  let validationError: string | null = null;
-  const hasTimeInputs = startTime !== '' && endTime !== '';
-  if (hasTimeInputs) {
-    if (endTime <= startTime) {
-      validationError = '종료 시간은 시작 시간보다 늦어야 합니다.';
-    } else if (attendees < 1) {
-      validationError = '참석 인원은 1명 이상이어야 합니다.';
-    }
-  }
-  const isFilterComplete = hasTimeInputs && !validationError;
+  const { validationError, isFilterComplete } = useBookingValidation({ startTime, endTime, attendees });
 
   // 필터링
   const floors = [...new Set(rooms.map((r: { floor: number }) => r.floor))].sort((a: number, b: number) => a - b);

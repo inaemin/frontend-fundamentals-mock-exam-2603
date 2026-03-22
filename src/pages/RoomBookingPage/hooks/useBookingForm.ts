@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { formatDate } from 'pages/utils';
-import { validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
+import { validateDate, validateTimeSlot, validateAttendees, validateEquipment } from 'pages/validators';
 import { Room, Reservation } from 'pages/types';
 
 export type BookingFormState = {
@@ -26,6 +26,7 @@ export function useBookingForm() {
 
   let initError: string | null = null;
   try {
+    validateDate(form.date);
     validateTimeSlot(form.startTime);
     validateTimeSlot(form.endTime);
     validateAttendees(form.attendees);
@@ -35,23 +36,26 @@ export function useBookingForm() {
   }
 
   const setField = <K extends keyof BookingFormState>(field: K, value: BookingFormState[K]) => {
-    setSearchParams(prev => {
-      if (field === 'date') {
-        value ? prev.set('date', value as string) : prev.delete('date');
-      } else if (field === 'startTime') {
-        value ? prev.set('startTime', value as string) : prev.delete('startTime');
-      } else if (field === 'endTime') {
-        value ? prev.set('endTime', value as string) : prev.delete('endTime');
-      } else if (field === 'attendees') {
-        (value as number) > 1 ? prev.set('attendees', String(value)) : prev.delete('attendees');
-      } else if (field === 'equipment') {
-        const eq = value as string[];
-        eq.length > 0 ? prev.set('equipment', eq.join(',')) : prev.delete('equipment');
-      } else if (field === 'preferredFloor') {
-        value !== null ? prev.set('floor', String(value)) : prev.delete('floor');
-      }
-      return prev;
-    }, { replace: true });
+    setSearchParams(
+      prev => {
+        if (field === 'date') {
+          value ? prev.set('date', value as string) : prev.delete('date');
+        } else if (field === 'startTime') {
+          value ? prev.set('startTime', value as string) : prev.delete('startTime');
+        } else if (field === 'endTime') {
+          value ? prev.set('endTime', value as string) : prev.delete('endTime');
+        } else if (field === 'attendees') {
+          (value as number) > 1 ? prev.set('attendees', String(value)) : prev.delete('attendees');
+        } else if (field === 'equipment') {
+          const eq = value as string[];
+          eq.length > 0 ? prev.set('equipment', eq.join(',')) : prev.delete('equipment');
+        } else if (field === 'preferredFloor') {
+          value !== null ? prev.set('floor', String(value)) : prev.delete('floor');
+        }
+        return prev;
+      },
+      { replace: true }
+    );
   };
 
   const hasTimeInputs = form.startTime !== '' && form.endTime !== '';

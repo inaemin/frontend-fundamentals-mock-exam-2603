@@ -1,3 +1,8 @@
+export const ROUTES = {
+  HOME: '/',
+  BOOKING: '/booking',
+} as const;
+
 export const EQUIPMENT_LABELS: Record<string, string> = {
   tv: 'TV',
   whiteboard: '화이트보드',

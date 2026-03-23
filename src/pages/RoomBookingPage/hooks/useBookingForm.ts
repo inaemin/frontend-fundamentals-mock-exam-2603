@@ -24,17 +24,6 @@ export function useBookingForm() {
     preferredFloor: searchParams.get('floor') ? Number(searchParams.get('floor')) : null,
   };
 
-  let initError: string | null = null;
-  try {
-    validateDate(form.date);
-    validateTimeSlot(form.startTime);
-    validateTimeSlot(form.endTime);
-    validateAttendees(form.attendees);
-    validateEquipment(form.equipment);
-  } catch (e) {
-    initError = e instanceof Error ? e.message : null;
-  }
-
   const setField = <K extends keyof BookingFormState>(field: K, value: BookingFormState[K]) => {
     setSearchParams(
       prev => {
@@ -58,9 +47,19 @@ export function useBookingForm() {
     );
   };
 
-  const hasTimeInputs = form.startTime !== '' && form.endTime !== '';
   let validationError: string | null = null;
-  if (hasTimeInputs) {
+  try {
+    validateDate(form.date);
+    validateTimeSlot(form.startTime);
+    validateTimeSlot(form.endTime);
+    validateAttendees(form.attendees);
+    validateEquipment(form.equipment);
+  } catch (e) {
+    validationError = e instanceof Error ? e.message : null;
+  }
+
+  const hasTimeInputs = form.startTime !== '' && form.endTime !== '';
+  if (!validationError && hasTimeInputs) {
     if (form.endTime <= form.startTime) {
       validationError = '종료 시간은 시작 시간보다 늦어야 합니다.';
     } else if (form.attendees < 1) {
@@ -87,5 +86,5 @@ export function useBookingForm() {
       });
   };
 
-  return { form, setField, initError, validationError, isFormComplete, getAvailableRooms };
+  return { form, setField, validationError, isFormComplete, getAvailableRooms };
 }

@@ -22,11 +22,11 @@ import { RoomList, EmptyRoomList } from './components/RoomList';
 export function RoomBookingPage() {
   const navigate = useNavigate();
   const navigateWithMessage = useNavigateWithMessage();
-  const { form, setField, initError, validationError, isFormComplete, getAvailableRooms } = useBookingForm();
+  const { form, setField, validationError, isFormComplete, getAvailableRooms } = useBookingForm();
   const { date, startTime, endTime, attendees, equipment, preferredFloor } = form;
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(initError);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
   const { data: reservations = [] } = useQuery({
